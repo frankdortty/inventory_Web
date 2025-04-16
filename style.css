@@ -577,3 +577,102 @@
     text-decoration: none;
     color: inherit;
 }
+/* for the dsahboar page */
+.dashboard {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+.dashboard header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.dashboard .back-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.dashboard .settings-icon {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.dashboard .loading {
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.dashboard .profit-analysis {
+    background: blue;
+    color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dashboard .amount {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.dashboard .session-expired-cards {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 2em;
+    gap: 10px;
+}
+
+.dashboard .card {
+    background: white;
+    width: 48%;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dashboard .card.full-width {
+    width: 100%;
+}
+
+.dashboard .card i {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+.dashboard .card p{
+    font-size: 22px;
+}
+
+.dashboard .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background: white;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.dashboard .nav-item {
+    text-decoration: none;
+    color: black;
+    font-size: 14px;
+    text-align: center;
+}
+
+.dashboard .nav-item.active {
+    color: blue;
+}

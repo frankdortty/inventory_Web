@@ -1,55 +1,61 @@
-<?php 
+<?php
+// Include database connection
+include('const/db.php');
+
+// Initialize variables
+$username = $password = $companyName = "";
+$errorMessage = "";
+
+// Start the session
 session_start();
-include('const/db.php'); // Include database connection
 
-// Handle login logic
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    try {
-        // Check if all required fields are present
-        if (!isset($_POST['username'], $_POST['password'], $_POST['companyName'])) {
-            throw new Exception('Missing required fields');
-        }
+// Check if the form has been submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form data
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $companyName = $_POST['companyName'];
 
-        $username = trim($_POST['username']);
-        $password = trim($_POST['password']);
-        $companyName = trim($_POST['companyName']);
-
-        // Prepare and execute query to fetch user data
-        $query = "SELECT * FROM users WHERE username = :username AND company_name = :companyName";
-        $stmt = $pdo->prepare($query);
-
+    // Prepare SQL query to fetch user details based on username and company name
+    $query = "SELECT * FROM users WHERE username = ? AND company_name = ?";
+    if ($stmt = $conn->prepare($query)) {
         // Bind parameters
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':companyName', $companyName);
+        $stmt->bind_param("ss", $username, $companyName);
 
-        // Execute the statement
+        // Execute query
         $stmt->execute();
+        $result = $stmt->get_result();
 
-        // Check if any rows were returned
-        if ($stmt->rowCount() > 0) {
+        // Check if any row was returned (user exists)
+        if ($result->num_rows == 1) {
             // Fetch the user data
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user = $result->fetch_assoc();
 
-            // Verify the entered password against the stored hashed password
+            // Verify the password (assuming the password is hashed using password_hash())
             if (password_verify($password, $user['password'])) {
-                // Store user details in session
-                $_SESSION['username'] = $username;
-                $_SESSION['companyName'] = $companyName;
-
-                // Redirect to home page
+                // Correct login, store company name in session
+                $_SESSION['companyName'] = $companyName; 
+                // Redirect to home.php
                 header("Location: home.php");
                 exit();
             } else {
-                $_SESSION['error_message'] = "Invalid credentials";
+                $errorMessage = "Incorrect password.";
             }
         } else {
-            $_SESSION['error_message'] = "Invalid credentials";
+            $errorMessage = "Username or company name is incorrect.";
         }
-    } catch (Exception $e) {
-        $_SESSION['error_message'] = "Error: " . $e->getMessage();
+
+        // Close the statement
+        $stmt->close();
+    } else {
+        $errorMessage = "Database query failed.";
     }
 }
+
+// Close the database connection
+$conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,18 +68,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="profile-icon">L</div>
             </div>
             <div class="form">
-                <?php
-                if (isset($_SESSION['error_message'])) {
-                    echo "<p style='color: red;'>" . $_SESSION['error_message'] . "</p>";
-                    unset($_SESSION['error_message']); // Clear the error after displaying
-                }
-                ?>
-                <form  method="post">
+                <form method="post">
                     <input type="text" name="username" class="input-box" placeholder="Username" required>
                     <input type="password" name="password" class="input-box" placeholder="Password" required>
                     <input type="text" name="companyName" class="input-box" placeholder="Company Name" required>
                     <button type="submit" class="login-btn">Login</button>
                 </form>
+                <?php if ($errorMessage != ""): ?>
+                    <p class="error-message"><?php echo $errorMessage; ?></p>
+                <?php endif; ?>
                 <p class="register-link">Don't have an account? <a href="register.php">Register</a></p>
             </div>
         </div>

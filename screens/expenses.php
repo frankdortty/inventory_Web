@@ -1,47 +1,35 @@
 <?php 
-include '../const/db.php'; // Include database connection
+    session_start();
+    include('../const/db.php');
 
-// Initialize response array
-$response = [
-    'status' => 'error',
-    'message' => ''
-];
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $name = mysqli_real_escape_string($conn, $_POST['name']);
+        $explain = mysqli_real_escape_string($conn, $_POST['explain']);
+        $amount = floatval($_POST['amount']); // Ensure it's numeric
+        $date = mysqli_real_escape_string($conn, $_POST['date']);
 
-// Check if the form is submitted via POST and necessary data is provided
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['explain'], $_POST['amount'], $_POST['date'])
-    && !empty($_POST['name']) && !empty($_POST['explain']) && !empty($_POST['amount']) && !empty($_POST['date'])) {
+        $companyName = isset($_SESSION['companyName']) ? mysqli_real_escape_string($conn, $_SESSION['companyName']) : "Unknown";
 
-    // Sanitize and assign input values
-    $name = $_POST['name'];
-    $explain = $_POST['explain'];
-    $amount = (float) $_POST['amount']; // Cast to float for amount
-    $date = $_POST['date'];
+        $query = "INSERT INTO expenses (company, name, explains, amount, date) VALUES (?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "sssds", $companyName, $name, $explain, $amount, $date);
 
-    try {
-        // Prepare the SQL insert statement
-        $stmt = $pdo->prepare("INSERT INTO expenses (name, explains, amount, date) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $explain, $amount, $date]);
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['successMessage'] = "Expense saved successfully";
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            $_SESSION['errorMessage'] = "Error saving expense";
+        }
 
-        // On success
-        $response = [
-            'status' => 'success',
-            'message' => 'Expense saved successfully'
-        ];
-    } catch (PDOException $e) {
-        // Handle any database errors
-        $response = [
-            'status' => 'error',
-            'message' => 'Error saving expense: ' . $e->getMessage()
-        ];
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // If fields are missing or empty
-    $response = [
-        'status' => 'error',
-        'message' => 'All fields are required and must not be empty'
-    ];
-}
 
+    // Fetch session messages
+    $successMessage = isset($_SESSION['successMessage']) ? $_SESSION['successMessage'] : null;
+    $errorMessage = isset($_SESSION['errorMessage']) ? $_SESSION['errorMessage'] : null;
+    unset($_SESSION['successMessage'], $_SESSION['errorMessage']);
 ?>
 
 <!DOCTYPE html>
@@ -55,50 +43,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['expla
                 <span class="title">StoreExpenses</span>
             </header>
 
-            <!-- Form for expense data -->
             <form method="POST" id="expenseForm">
                 <input type="text" name="name" id="itemName" placeholder="Item Name" required>
                 <input type="text" name="explain" id="explanation" placeholder="Explain" required>
-                <input type="number" name="amount" id="amount" placeholder="Amount" required>
+                <input type="number" name="amount" id="amount" placeholder="Amount" step="0.01" required>
                 <input type="date" name="date" id="date" required>
-
                 <button type="submit" class="save-btn">Save</button>
             </form>
 
-            <!-- Message to show after submission -->
-            <?php if (isset($response['message'])): ?>
-                <div class="message <?= $response['status'] ?>" id="responseMessage">
-                    <p><?= $response['message'] ?></p>
+            <?php if ($successMessage): ?>
+                <div class="message success" id="responseMessage">
+                    <p><?php echo htmlspecialchars($successMessage); ?></p>
+                </div>
+            <?php elseif ($errorMessage): ?>
+                <div class="message error" id="responseMessage">
+                    <p><?php echo htmlspecialchars($errorMessage); ?></p>
                 </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Popup Modal for Success -->
     <div id="popup" class="popup" style="display: none;">
         <div class="popup-content">
             <p id="popupMessage"></p>
             <button onclick="closePopup()">Close</button>
-           
         </div>
     </div>
 
     <script>
-        // Show popup if there's a success message
-        <?php if ($response['status'] === 'success'): ?>
+        function showSuccessMessage() {
             document.getElementById('popupMessage').innerText = 'Expense saved successfully';
             document.getElementById('popup').style.display = 'block';
-        <?php endif; ?>
+        }
 
-        // Close the popup when the user clicks the button
         function closePopup() {
             document.getElementById('popup').style.display = 'none';
-             window.location.href ='../home.php'
+            window.location.href = '../home.php';
         }
+
+        window.onload = function() {
+            <?php if ($successMessage): ?>
+                showSuccessMessage();
+            <?php endif; ?>
+        };
     </script>
 
     <style>
-        /* Style for popup */
         .popup {
             position: fixed;
             top: 0;

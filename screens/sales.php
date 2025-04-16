@@ -102,27 +102,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
-        document.querySelector('form').addEventListener('input', function () {
-            let price = 0;
-            let selectedProduct = document.querySelector('select[name="product"]').value;
-
-            if (selectedProduct === 'Product A') price = 10;
-            else if (selectedProduct === 'Product B') price = 20;
-            else if (selectedProduct === 'Product C') price = 30;
-
-            let quantity = parseInt(document.querySelector('input[name="quantity"]').value) || 0;
-
-            let subtotal = price * quantity;
-            let tax = subtotal * 0.05;
-            let profit = subtotal * 0.10;
-            let total = subtotal + tax;
-
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('tax').textContent = tax.toFixed(2);
-            document.getElementById('profit').textContent = profit.toFixed(2);
-            document.getElementById('total').textContent = total.toFixed(2);
-        });
-    </script>
 </body>
 </html>

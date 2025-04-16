@@ -1,45 +1,60 @@
-<?php 
-session_start();
-include('const/db.php'); // Include database connection
+<?php
+// Include database connection
+include('const/db.php');
 
-// Handle registration logic
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    try {
-        // Validate required fields
-        if (!isset($_POST['username'], $_POST['fullName'], $_POST['email'], $_POST['password'], $_POST['companyName']) ||
-            empty($_POST['username']) || empty($_POST['fullName']) || empty($_POST['email']) || empty($_POST['password']) || empty($_POST['companyName'])) {
-            throw new Exception('All fields are required and must not be empty.');
+// Initialize variables
+$username = $fullName = $email = $password = $companyName = "";
+$errorMessage = "";
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Collect form data
+    $username = $_POST['username'];
+    $fullName = $_POST['fullName'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $companyName = $_POST['companyName'];
+
+    // Check if email already exists
+    $checkEmailQuery = "SELECT id FROM users WHERE email = ?";
+    if ($stmt = $conn->prepare($checkEmailQuery)) {
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows > 0) {
+            $errorMessage = "Error: This email is already registered. Please use a different email.";
+        } else {
+            // Proceed with inserting the new user
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $createdAt = date("Y-m-d H:i:s");
+
+            $insertQuery = "INSERT INTO users (username, full_name, email, password, company_name, created_at) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
+
+            if ($stmt = $conn->prepare($insertQuery)) {
+                $stmt->bind_param("ssssss", $username, $fullName, $email, $hashedPassword, $companyName, $createdAt);
+
+                if ($stmt->execute()) {
+                    // Redirect to login page after successful registration
+                    header("Location: login.php");
+                    exit();
+                } else {
+                    $errorMessage = "Error: Could not register the user. Please try again.";
+                }
+
+                $stmt->close();
+            } else {
+                $errorMessage = "Database query failed.";
+            }
         }
 
-        $username = trim($_POST['username']);
-        $fullName = trim($_POST['fullName']);
-        $email = trim($_POST['email']);
-        $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Secure password hashing
-        $companyName = trim($_POST['companyName']);
-
-        // Check if username or email already exists
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $email]);
-        if ($stmt->rowCount() > 0) {
-            throw new Exception('Username or email already exists.');
-        }
-
-        // Insert user data into database
-        $stmt = $pdo->prepare("
-            INSERT INTO users (username, full_name, email, password, company_name) 
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([$username, $fullName, $email, $password, $companyName]);
-
-        // Registration successful, redirect to login
-        $_SESSION['success_message'] = "Registration successful! Please log in.";
-        header("Location: login.php");
-        exit();
-
-    } catch (Exception $e) {
-        $_SESSION['error_message'] = $e->getMessage();
+        $stmt->close();
     }
 }
+
+// Close the database connection
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -53,12 +68,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="profile-icon">L</div>
             </div>
             <div class="form">
-                <?php
-                if (isset($_SESSION['error_message'])) {
-                    echo "<p style='color: red;'>" . $_SESSION['error_message'] . "</p>";
-                    unset($_SESSION['error_message']); // Clear error after displaying
-                }
-                ?>
+                <!-- Display error messages if any -->
+                <?php if ($errorMessage != ""): ?>
+                    <p class="error-message"><?php echo $errorMessage; ?></p>
+                <?php endif; ?>
+                
                 <form action="register.php" method="post">
                     <input type="text" name="username" class="input-box" placeholder="Username" required>
                     <input type="text" name="fullName" class="input-box" placeholder="Full Name" required>

@@ -1,116 +1,64 @@
+<?php 
+// Include database connection
+include('const/db.php');  
+
+// Start the session
+session_start();  
+
+// Check if the company name is stored in the session
+if (!isset($_SESSION['companyName'])) {     
+    // Redirect to login if session is not set     
+    header("Location: login.php");     
+    exit(); 
+}  
+
+// Fetch the company name from the session
+$companyName = $_SESSION['companyName'];  
+
+// Fetch total products
+$productQuery = "SELECT COUNT(*) AS total_products FROM products WHERE company = ?";
+$productStmt = $conn->prepare($productQuery);
+$productStmt->bind_param("s", $companyName);
+$productStmt->execute();
+$productResult = $productStmt->get_result();
+$productCount = $productResult->fetch_assoc()['total_products'];  
+
+// Fetch total sales for the current month
+$currentMonthQuery = "SELECT SUM(total) AS total_sales_current_month FROM sales WHERE company = ? AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())";
+$currentMonthStmt = $conn->prepare($currentMonthQuery);
+$currentMonthStmt->bind_param("s", $companyName);
+$currentMonthStmt->execute();
+$currentMonthResult = $currentMonthStmt->get_result();
+$currentMonthSales = $currentMonthResult->fetch_assoc()['total_sales_current_month'] ?? 0;  
+
+// Fetch total sales for the previous month
+$previousMonthQuery = "SELECT SUM(total) AS total_sales_previous_month FROM sales WHERE company = ? AND MONTH(created_at) = MONTH(CURRENT_DATE()) - 1 AND YEAR(created_at) = YEAR(CURRENT_DATE())";
+$previousMonthStmt = $conn->prepare($previousMonthQuery);
+$previousMonthStmt->bind_param("s", $companyName);
+$previousMonthStmt->execute();
+$previousMonthResult = $previousMonthStmt->get_result();
+$previousMonthSales = $previousMonthResult->fetch_assoc()['total_sales_previous_month'] ?? 0;
+
+// Calculate the monthly income growth or decrease
+if ($previousMonthSales > 0) {
+    $growthPercentage = (($currentMonthSales - $previousMonthSales) / $previousMonthSales) * 100;
+} else {
+    $growthPercentage = $currentMonthSales > 0 ? 100 : 0; // If there's no previous month sales, consider it as 100% growth or 0 if no sales at all
+}
+
+$salesQuery = "SELECT COUNT(*) AS total_sales FROM sales WHERE company = ?"; $salesStmt = $conn->prepare($salesQuery); $salesStmt->bind_param("s", $companyName); $salesStmt->execute(); $salesResult = $salesStmt->get_result(); $salesCount = $salesResult->fetch_assoc()['total_sales']; 
+// Close the database connection
+$productStmt->close();
+$currentMonthStmt->close();
+$previousMonthStmt->close();
+$conn->close();
+
+
+?> 
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer src="script.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-
-.dashboard {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-}
-
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.settings-icon {
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.loading {
-    font-weight: bold;
-    margin: 20px 0;
-}
-
-.profit-analysis {
-    background: blue;
-    color: white;
-    padding: 25px;
-    border-radius: 10px;
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.amount {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.session-expired-cards {
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 2em;
-    gap: 10px;
-}
-
-.card {
-    background: white;
-    width: 48%;
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.card.full-width {
-    width: 100%;
-}
-
-.card i {
-    font-size: 20px;
-    margin-bottom: 5px;
-}
-.card p{
-    font-size: 22px;
-}
-
-.bottom-nav {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    background: white;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.nav-item {
-    text-decoration: none;
-    color: black;
-    font-size: 14px;
-    text-align: center;
-}
-
-.nav-item.active {
-    color: blue;
-}
-
-    </style>
-</head>
+<?php include("const/head.php"); ?>
 <body>
     <div class="dashboard">
         <header>
@@ -119,7 +67,7 @@ header {
             <a href="screens/setting.php"><i class="settings-icon fas fa-cog"></i></a>
         </header>
 
-        <div class="loading">Loading...</div>
+        <div class="loading"><?php echo $companyName; ?></div>
 
         <div class="profit-analysis">
             <h3>Profit Analysis</h3>
@@ -130,22 +78,21 @@ header {
         <div class="session-expired-cards">
             <div class="card">
                 <i class="fas fa-utensils"></i>
-                <p> 22 </p>
+                <p> <?php echo $productCount; ?> </p>
                 <span>Total Products</span>
             </div>
             <div class="card">
                 <i class="fas fa-home"></i>
-                <p> 42 </p>
+                <p> <?php echo $salesCount; ?> </p>
                 <span>Total Sales</span>
             </div>
             <div class="card full-width">
                 <i class="fas fa-user"></i>
-                <p> 52% </p>
+                <p> <?php echo round($growthPercentage, 2); ?>% </p>
                 <span>Monthly Income Growth</span>
             </div>
         </div>
 
-      
         <?php include("const/bottomNav.php") ?>
     </div>
     <script src="scripts/index.js"></script>

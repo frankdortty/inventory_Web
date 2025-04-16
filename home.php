@@ -23,7 +23,7 @@
                     <i class="fas fa-shopping-cart"></i>
                     <p>Make Sales</p>
                 </div>
-                <div class="menu-item">
+                <div class="menu-item"  onclick="window.location.href ='./screens/viewsales.php' ">
                     <i class="fas fa-chart-bar"></i>
                     <p>Sales Report</p>
                 </div>
@@ -31,7 +31,7 @@
                     <i class="fas fa-dollar-sign"></i>
                     <p>Store Expenses</p>
                 </div>
-                <div class="menu-item">
+                <div class="menu-item" onclick="window.location.href ='./screens/viewexpenses.php'">
                     <i class="fas fa-file-invoice-dollar"></i>
                     <p>Expense Report</p>
                 </div>

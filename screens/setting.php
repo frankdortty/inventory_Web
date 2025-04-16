@@ -1,3 +1,19 @@
+<?php
+// Start the session
+session_start();
+
+// Check if the user is logged in before logging out
+if (isset($_POST['logout'])) {
+    // Destroy all session variables
+    session_unset();
+    // Destroy the session
+    session_destroy();
+    // Redirect to the login page or home page
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,117 +24,117 @@
     <script defer src="script.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-            .settings-container {
-                background: #fff;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                padding:25px 15px;
-            }
+        .settings-container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding:25px 15px;
+        }
 
-            header {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 20px;
-            }
+        header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
 
-            .back-btn {
-                background: none;
-                border: none;
-                font-size: 20px;
-                cursor: pointer;
-            }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
 
-            .title {
-                text-align: center;
-                font-size: 20px;
-                font-weight: bold;
-                margin-bottom: 25px;
-            }
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
 
-            .settings-card {
-                background: white;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                margin-bottom: 15px;
-            }
+        .settings-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
 
-            .setting-item {
-                padding: 22px;
-                border-bottom: 1px solid #ddd;
-                cursor: pointer;
-                font-size: 22px;
-            }
+        .setting-item {
+            padding: 22px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 22px;
+        }
 
-            .setting-item:last-child {
-                border-bottom: none;
-            }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
 
-            .setting-item:hover {
-                background: #f0f0f0;
-            }
+        .setting-item:hover {
+            background: #f0f0f0;
+        }
 
-            /* Toggle Switch */
-            .toggle-section {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: white;
-                padding: 12px;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
+        /* Toggle Switch */
+        .toggle-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-            .toggle-label {
-                font-weight: bold;
-                color: blue;
-            }
+        .toggle-label {
+            font-weight: bold;
+            color: blue;
+        }
 
-            /* Switch */
-            .switch {
-                position: relative;
-                display: inline-block;
-                width: 34px;
-                height: 20px;
-            }
+        /* Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
 
-            .switch input {
-                opacity: 0;
-                width: 0;
-                height: 0;
-            }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
 
-            .slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: #ccc;
-                border-radius: 34px;
-                transition: .4s;
-            }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 34px;
+            transition: .4s;
+        }
 
-            .slider:before {
-                position: absolute;
-                content: "";
-                height: 14px;
-                width: 14px;
-                left: 3px;
-                bottom: 3px;
-                background-color: white;
-                border-radius: 50%;
-                transition: .4s;
-            }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
 
-            input:checked + .slider {
-                background-color: blue;
-            }
+        input:checked + .slider {
+            background-color: blue;
+        }
 
-            input:checked + .slider:before {
-                transform: translateX(14px);
-            }
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
 
     </style>
 </head>
@@ -138,8 +154,13 @@
         </div>
 
         <div class="settings-card">
-            <div class="setting-item">Terms & Conditions</div>
-            <div class="setting-item">Log Out</div>
+            <div class="setting-item" onclick="window.location.href ='./terms.php' ">Terms & Conditions</div>
+            <!-- Logout Button -->
+            <form action="" method="POST">
+                <div class="setting-item">
+                    <button type="submit" name="logout" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;">Log Out</button>
+                </div>
+            </form>
         </div>
 
         <div class="toggle-section">
@@ -150,6 +171,7 @@
             </label>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const toggleSwitch = document.getElementById("toggleSwitch");
@@ -162,7 +184,6 @@
                 }
             });
         });
-
     </script>
 </body>
 </html>
