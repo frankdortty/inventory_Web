@@ -10,7 +10,7 @@
             </header>
 
             <div class="market-grid">
-                <a href="https://www.demomarketplace.com" class="market-item" target="_blank">
+                <a href="demo.php" class="market-item" >
                     <i class="fas fa-star"></i>
                     <span>Demo</span>
                 </a>

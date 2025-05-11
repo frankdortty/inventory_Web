@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Retrieve company name from session
     $companyName = isset($_SESSION['companyName']) ? $_SESSION['companyName'] : 'Default Company';  // Use fallback if not set
-
+    $companyName = isset($_SESSION['companyName']) ? $_SESSION['companyName'] : 'Default Company';  // Use fallback if not set
     // Handle file upload
     $image = $_FILES['image'];
     $imageName = $image['name'];

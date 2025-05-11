@@ -67,7 +67,10 @@ $conn->close();
             <a href="screens/setting.php"><i class="settings-icon fas fa-cog"></i></a>
         </header>
 
-        <div class="loading"><?php echo $companyName; ?></div>
+        <div class="loading" style="display:flex; gap:22px; align-items:center ">
+            <div class="image" style="border-radius:50% background-color:blue,"> <img src="media/send.jpg" style="border-radius:50%" width="60px" alt="Profile Image">  </div>
+            <div class="text">Hi, <?php echo $companyName; ?> </div>
+        </div>
 
         <div class="profit-analysis">
             <h3>Profit Analysis</h3>
@@ -76,15 +79,19 @@ $conn->close();
         </div>
 
         <div class="session-expired-cards">
-            <div class="card">
-                <i class="fas fa-utensils"></i>
-                <p> <?php echo $productCount; ?> </p>
-                <span>Total Products</span>
+           <div class="card">
+                <a href="screens/viewProduct.php" style="color:black">
+                    <i class="fas fa-utensils"></i>
+                    <p> <?php echo $productCount; ?> </p>
+                    <span>Total Products</span>
+                </a>
             </div>
             <div class="card">
-                <i class="fas fa-home"></i>
-                <p> <?php echo $salesCount; ?> </p>
-                <span>Total Sales</span>
+                <a href="screens/viewsales.php" style="color:black">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <p> <?php echo $salesCount; ?> </p>
+                    <span>Total Sales</span>
+                </a>
             </div>
             <div class="card full-width">
                 <i class="fas fa-user"></i>

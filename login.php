@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Correct login, store company name in session
                 $_SESSION['companyName'] = $companyName; 
                 // Redirect to home.php
-                header("Location: home.php");
+                header("Location: dashboard.php");
                 exit();
             } else {
                 $errorMessage = "Incorrect password.";

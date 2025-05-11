@@ -6,7 +6,6 @@
         <div class="container">
             <div class="app-title">
                 <h2>INVENTORY PRO</h2>
-                <p>SLOGAN HERE</p>
             </div>
 
             <!-- Menu Grid -->
